@@ -1,9 +1,11 @@
 // CropService to handle business logic
 package com.cropdeal.cropservice.service;
-
+import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Sort;
 import com.cropdeal.cropservice.entity.Crop;
 import com.cropdeal.cropservice.repository.CropRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,6 +33,16 @@ public class CropService {
         return cropRepository.save(crop);
     }
 
+
+    // Sort Prices by Price
+    public List<Crop> getCropsFiltered(Double minPrice, Double maxPrice) {
+        if (minPrice != null && maxPrice != null) {
+            return cropRepository.findByPriceBetween(minPrice, maxPrice, Sort.by(Sort.Direction.ASC, "price"));
+        } else {
+            return cropRepository.findAll(); // No sorting when filter isn't applied
+        }
+    }
+
     // Update existing crop
     public Crop updateCrop(Long id, Crop updatedCrop) {
         Optional<Crop> existingCrop = cropRepository.findById(id);
@@ -45,11 +57,20 @@ public class CropService {
     }
 
     // Delete crop by ID
+    @Modifying
+    @Transactional
     public boolean deleteCrop(Long id) {
         if (cropRepository.existsById(id)) {
             cropRepository.deleteById(id);
+            cropRepository.reorderCropIds(); // Auto-reorder after deletion
             return true;
         }
         return false;
     }
+
+    @Transactional
+    public void reorderCropIds() {
+        cropRepository.reorderCropIds();
+    }
+
 }
