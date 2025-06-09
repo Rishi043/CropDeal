@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/users/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -32,7 +32,10 @@ public class AuthController {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
-        String token = jwtService.generateToken(request.getEmail());
-        return new AuthResponse(token);
+
+        String token = jwtService.generateToken(request.getEmail());  // ✅ Generate JWT token
+        return new AuthResponse(token); // ✅ Send token in response
     }
+
+
 }

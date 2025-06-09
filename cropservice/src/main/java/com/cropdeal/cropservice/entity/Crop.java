@@ -27,6 +27,4 @@ public class Crop {
     @NotNull(message = "Price is required")
     @Min(value = 1, message = "Price must be at least 1")
     private Double price;
-
-    // Getters and Setters
 }
