@@ -28,7 +28,17 @@ public class OrderService {
         order.setOrderDate(LocalDate.now());
 
         order.setStatus("PENDING");
-        return orderRepo.save(order);
+        return orderRepo.saveAndFlush(order);
+    }
+
+    public void updateOrderStatusByCropId(Long orderId, String status) {
+        Order order = orderRepo.findById(orderId).orElseThrow(()->new RuntimeException("Order not found by "+orderId));
+        if (order != null) {
+            order.setStatus(status);
+            orderRepo.save(order);
+        } else {
+            throw new RuntimeException("Order not found for crop ID: " + orderId);
+        }
     }
 
     public void deleteOrder(Long orderId) {
@@ -43,6 +53,11 @@ public class OrderService {
     // fetch orders by dealer email
     public List<Order> getOrdersByDealerEmail(String email) {
         return orderRepo.findByDealerEmail(email);
+    }
+
+    public Order getOrderById(Long id) {
+
+        return orderRepo.findById(id).orElseThrow(()->new  RuntimeException("Order not found by "+id));
     }
 }
 

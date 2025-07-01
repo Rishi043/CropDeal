@@ -17,6 +17,10 @@ public class CropService {
     @Autowired
     private CropRepository cropRepository;
 
+    public CropService(CropRepository cropRepository) {
+        this.cropRepository = cropRepository;
+    }
+
     // Get all crops
     public List<Crop> getAllCrops() {
         return cropRepository.findAll();
@@ -33,11 +37,16 @@ public class CropService {
         return cropRepository.save(crop);
     }
 
+    // Sort by Prices
+    public List<Crop> getCropsSortedByPrice() {
+        return cropRepository.findAll(Sort.by(Sort.Direction.ASC, "pricePerKg"));
+    }
 
-    // Sort Prices by Price
+
+    // Sort Prices by Range of Price
     public List<Crop> getCropsFiltered(Double minPrice, Double maxPrice) {
         if (minPrice != null && maxPrice != null) {
-            return cropRepository.findByPriceBetween(minPrice, maxPrice, Sort.by(Sort.Direction.ASC, "price"));
+            return cropRepository.findByPricePerKgBetween(minPrice, maxPrice, Sort.by(Sort.Direction.ASC, "pricePerKg"));
         } else {
             return cropRepository.findAll(); // No sorting when filter isn't applied
         }
@@ -50,7 +59,7 @@ public class CropService {
             Crop crop = existingCrop.get();
             crop.setName(updatedCrop.getName());
             crop.setType(updatedCrop.getType());
-            crop.setPrice(updatedCrop.getPrice());
+            //crop.setPrice(updatedCrop.getPrice());
             return cropRepository.save(crop);
         }
         return null;
@@ -70,7 +79,39 @@ public class CropService {
 
     @Transactional
     public void reorderCropIds() {
+
         cropRepository.reorderCropIds();
     }
 
+    public List<Crop> getCropsByType(String type) {
+
+        return cropRepository.findByType(type);
+    }
+
+    public List<Crop> getCropsByFarmerMail(String farmerMail) {
+
+        return cropRepository.findByFarmerMail(farmerMail);
+    }
+
+    public Crop getCropByName(String name) {
+        List<Crop> crops = cropRepository.findByName(name);
+        return crops.isEmpty() ? null : crops.get(0);
+    }
+
+    public void reduceQuantityAndDeleteIfZero(Long cropId, int quantityToDeduct) {
+        Crop crop = cropRepository.findById(cropId)
+                .orElseThrow(() -> new RuntimeException("Crop not found with ID: " + cropId));
+
+        if (crop.getTotalQuantity() < quantityToDeduct) {
+            throw new RuntimeException("Not enough quantity available.");
+        }
+
+        crop.setTotalQuantity(crop.getTotalQuantity() - quantityToDeduct);
+
+        if (crop.getTotalQuantity() == 0) {
+            cropRepository.delete(crop);
+        } else {
+            cropRepository.save(crop);
+        }
+    }
 }

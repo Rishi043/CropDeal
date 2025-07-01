@@ -6,8 +6,10 @@ import com.cropdeal.cropservice.service.CropService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import com.cropdeal.cropservice.repository.CropRepository;
 
 import java.util.List;
 
@@ -19,9 +21,11 @@ public class CropController {
     // Constructor-based dependency injection
     private final CropService cropService;
 
+    @Autowired
     public CropController(CropService cropService) {
         this.cropService = cropService;
     }
+
 
     // Add a new crop with validation
     @PostMapping
@@ -32,13 +36,13 @@ public class CropController {
     }
 
     // Get all crops
-    @GetMapping
+    @GetMapping ("/allCrops")
     @Operation(summary = "Get all crops", description = "Returns the list of all crops")
     public ResponseEntity<List<Crop>> getAllCrops() {
         return ResponseEntity.ok(cropService.getAllCrops());
     }
 
-    // Get a single crop by ID
+    // Get a single crop by ID (farmer)
     @GetMapping("/{id}")
     @Operation(summary = "Get crop by ID", description = "Finds a crop by its ID")
     public ResponseEntity<Crop> getCropById(@PathVariable Long id) {
@@ -50,7 +54,7 @@ public class CropController {
         }
     }
 
-    // Update an existing crop
+    // Update an existing crop (farmer)
     @PutMapping("/{id}")
     @Operation(summary = "Update crop", description = "Updates an existing crop by ID")
     public ResponseEntity<Crop> updateCrop(@PathVariable Long id, @Valid @RequestBody Crop crop) {
@@ -68,6 +72,10 @@ public class CropController {
         return ResponseEntity.ok("Crop IDs reordered successfully!");
     }
 
+    @GetMapping("/filterPrice")
+    public ResponseEntity<List<Crop>> getCropsSortedByPrice() {
+        return ResponseEntity.ok(cropService.getCropsSortedByPrice());
+    }
 
     @GetMapping("/filter")
     public ResponseEntity<List<Crop>> getCropsFiltered(
@@ -76,8 +84,31 @@ public class CropController {
         return ResponseEntity.ok(cropService.getCropsFiltered(minPrice, maxPrice));
     }
 
+    @GetMapping("/by/{farmerMail}")
+    public ResponseEntity<List<Crop>> getCropsByFarmer(@PathVariable String farmerMail) {
+        return ResponseEntity.ok(cropService.getCropsByFarmerMail(farmerMail));
+    }
 
-    // Delete crop by ID
+    @GetMapping("/type/{type}")
+    public ResponseEntity<List<Crop>> getCropsFilteredByType(@PathVariable String type) {
+        return ResponseEntity.ok(cropService.getCropsByType(type));
+    }
+
+    @GetMapping("/by-name/{name}")
+    public ResponseEntity<Crop> getCropByName(@PathVariable String name) {
+        return ResponseEntity.ok(cropService.getCropByName(name));
+    }
+
+    @PutMapping("/reduce-and-delete/{id}")
+    public ResponseEntity<String> reduceAndDelete(@PathVariable Long id, @RequestParam int quantity) {
+        cropService.reduceQuantityAndDeleteIfZero(id, quantity);
+        return ResponseEntity.ok("Crop quantity updated. Deleted if quantity reached zero.");
+    }
+
+
+
+
+    // Delete crop by ID (farmer)
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete crop", description = "Deletes a crop by ID")
     public ResponseEntity<String> deleteCrop(@PathVariable Long id) {
