@@ -25,5 +25,5 @@ Database: MySQL
 Features:
 Farmer gets notified when a Dealer shows interest in his crop
 Dealer gets notified when a new crop is listed
-RabbitMQ 
+with Rabbit mq with Java Mail Sender.
 
