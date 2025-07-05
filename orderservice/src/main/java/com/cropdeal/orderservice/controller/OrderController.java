@@ -37,8 +37,10 @@ public class OrderController {
     @PostMapping ("/placeOrder")
     public ResponseEntity<String> placeOrder(@Valid @RequestBody OrderRequestDTO dto) {
         Order placedOrder = orderService.placeOrder(dto);
-        String message = "Order placed successfully with Crop ID: " + placedOrder.getCropId();
+        String message = "Order placed successfully with Order ID: " + placedOrder.getOrderId();
         return ResponseEntity.ok(message);
+
+        // String message = "Order placed successfully with Crop ID: " + placedOrder.getCropId();
 
     }
 

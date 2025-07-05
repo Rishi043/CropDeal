@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
             return exchange.getResponse().setComplete();
         }
-
+ 
         String token = authHeader.substring(7);
         if (!jwtUtil.validateToken(token)) {
             logger.warn("Invalid JWT token");

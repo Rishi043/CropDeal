@@ -1,5 +1,6 @@
 package com.cropdeal.paymentservice.controller;
 
+import com.cropdeal.paymentservice.dto.Crop;
 import com.cropdeal.paymentservice.dto.PurchaseRequest;
 import com.cropdeal.paymentservice.dto.StripeResponse;
 import com.cropdeal.paymentservice.service.StripeService;
@@ -33,4 +34,18 @@ public class PaymentController {
     public ResponseEntity<String> cancel() {
         return ResponseEntity.ok("Payment failed or cancelled.");
     }
+
+
+    // ✅ New endpoint to test Circuit Breaker on getCropByName
+    @GetMapping("/crops/by-name/{name}")
+    public ResponseEntity<?> getCropByName(@PathVariable String name) {
+    Crop crop = stripeService.getCropByName(name);
+    if (crop == null) {
+    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+            .body("Crop service unavailable (fallback triggered).");
+    }
+    return ResponseEntity.ok(crop);
+    }
 }
+
+

@@ -26,7 +26,7 @@
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="configserver" options="-parameters" />
       <module name="cropservice" options="-parameters" />
-      <module name="eurekaserver" options="-parameters" />
+      <module name="eurekaserver" options="" />
       <module name="userservice" options="-parameters" />
     </option>
   </component>
