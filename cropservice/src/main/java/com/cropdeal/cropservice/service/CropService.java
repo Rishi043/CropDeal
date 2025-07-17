@@ -93,10 +93,10 @@ public class CropService {
         return cropRepository.findByFarmerMail(farmerMail);
     }
 
-    public Crop getCropByName(String name) {
-        List<Crop> crops = cropRepository.findByName(name);
-        return crops.isEmpty() ? null : crops.get(0);
+    public List<Crop> getCropsByName(String name) {
+        return cropRepository.findByNameContainingIgnoreCase(name);
     }
+
 
     public void reduceQuantityAndDeleteIfZero(Long cropId, int quantityToDeduct) {
         Crop crop = cropRepository.findById(cropId)

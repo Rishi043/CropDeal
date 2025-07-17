@@ -15,6 +15,7 @@ public class Order {
     private Long orderId;
     private Long cropId;
     private String dealerEmail;
+    private Double quantity;
     private LocalDate orderDate;
     private String status ="Pending";
 }

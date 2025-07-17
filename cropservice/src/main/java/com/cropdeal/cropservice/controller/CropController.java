@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.cropdeal.cropservice.repository.CropRepository;
@@ -95,9 +96,14 @@ public class CropController {
     }
 
     @GetMapping("/by-name/{name}")
-    public ResponseEntity<Crop> getCropByName(@PathVariable String name) {
-        return ResponseEntity.ok(cropService.getCropByName(name));
+    public ResponseEntity<List<Crop>> getCropsByName(@PathVariable String name) {
+        List<Crop> crops = cropService.getCropsByName(name);
+        if (crops.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(crops);
+        }
+        return ResponseEntity.ok(crops);
     }
+
 
     @PutMapping("/reduce-and-delete/{id}")
     public ResponseEntity<String> reduceAndDelete(@PathVariable Long id, @RequestParam int quantity) {

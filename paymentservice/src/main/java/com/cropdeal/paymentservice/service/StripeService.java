@@ -155,12 +155,6 @@
 //        return "✅ Payment processed successfully. Order status updated and a confirmation email has been sent.";
 //    }
 //}
-
-
-
-
-
-
 package com.cropdeal.paymentservice.service;
 
 import com.cropdeal.paymentservice.client.CropClient;
@@ -174,10 +168,12 @@ import com.stripe.model.checkout.Session;
 import com.stripe.param.checkout.SessionCreateParams;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import io.github.resilience4j.retry.annotation.Retry;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class StripeService {
@@ -190,18 +186,25 @@ public class StripeService {
     private final OrderClient orderClient;
     private final NotificationClient notificationClient;
 
-    public StripeService(PaymentRepository paymentRepository, CropClient cropClient, OrderClient orderClient, NotificationClient notificationClient) {
+    public StripeService(PaymentRepository paymentRepository, CropClient cropClient,
+                         OrderClient orderClient, NotificationClient notificationClient) {
         this.paymentRepository = paymentRepository;
         this.cropClient = cropClient;
         this.orderClient = orderClient;
         this.notificationClient = notificationClient;
     }
 
-    // Implementing the Circuit Breaker for Crop Client
+    // ✅ Automatically set Stripe API key on app startup
+    @PostConstruct
+    public void init() {
+        Stripe.apiKey = secretKey;
+    }
+
     @CircuitBreaker(name = "cropClientBreaker", fallbackMethod = "fallbackCrop")
     @Retry(name = "cropClientBreaker", fallbackMethod = "fallbackCrop")
     public Crop getCropByName(String cropName) {
-        return cropClient.getCropByName(cropName).getBody();
+        List<Crop> crops = cropClient.getCropByName(cropName).getBody();
+        return (crops != null && !crops.isEmpty()) ? crops.get(0) : null;
     }
 
     public Crop fallbackCrop(String cropName, Exception e) {
@@ -210,20 +213,18 @@ public class StripeService {
     }
 
     public StripeResponse checkoutCrops(PurchaseRequest purchaseRequest) {
-        Stripe.apiKey = secretKey;
-
         Crop crop = getCropByName(purchaseRequest.getCrop());
 
-        // ✅ Handle fallback result to avoid 500 error
         if (crop == null) {
-        System.out.println("❌ Crop is null — returning fallback response.");
-        return StripeResponse.builder()
-        .status("FAILURE")
-        .message("Crop not found or crop-service is unavailable. Please try again later.")
-        .build();
+            System.out.println("❌ Crop is null — returning fallback response.");
+            return StripeResponse.builder()
+                    .status("FAILURE")
+                    .message("Crop not found or crop-service is unavailable.")
+                    .build();
         }
 
         Long cropId = crop.getId();
+        long priceInCents = (long) (crop.getPricePerKg() * 100); // Convert to smallest currency unit
 
         SessionCreateParams.LineItem.PriceData.ProductData productData =
                 SessionCreateParams.LineItem.PriceData.ProductData.builder()
@@ -232,8 +233,8 @@ public class StripeService {
 
         SessionCreateParams.LineItem.PriceData cropPrice =
                 SessionCreateParams.LineItem.PriceData.builder()
-                        .setCurrency(purchaseRequest.getCurrency() == null ? "USD" : purchaseRequest.getCurrency())
-                        .setUnitAmount(purchaseRequest.getAmount())
+                        .setCurrency(purchaseRequest.getCurrency() == null ? "usd" : purchaseRequest.getCurrency().toLowerCase())
+                        .setUnitAmount(priceInCents)
                         .setProductData(productData)
                         .build();
 
@@ -246,7 +247,9 @@ public class StripeService {
         SessionCreateParams params =
                 SessionCreateParams.builder()
                         .setMode(SessionCreateParams.Mode.PAYMENT)
-                        .setSuccessUrl("http://localhost:8085/payment/success/id/" + cropId + "/order/" + purchaseRequest.getOrderId() + "?quantity=" + purchaseRequest.getQuantity())
+                        .setSuccessUrl("http://localhost:8085/payment/success/id/" + cropId +
+                                "/order/" + purchaseRequest.getOrderId() +
+                                "?quantity=" + purchaseRequest.getQuantity())
                         .setCancelUrl("http://localhost:8085/payment/cancel")
                         .addLineItem(lineItem)
                         .build();
@@ -282,6 +285,10 @@ public class StripeService {
         Order order = orderClient.getOrderById(orderId).getBody();
         PurchaseRequest payment = paymentRepository.findByOrderId(orderId);
 
+        if (crop == null || order == null || payment == null) {
+            return "❌ Payment processing failed due to missing data.";
+        }
+
         double amount = crop.getPricePerKg() * quantity;
         String transactionId = payment.getId().toString();
 
@@ -294,8 +301,12 @@ public class StripeService {
         emailRequest.setQuantity(quantity);
         emailRequest.setCurrency(payment.getCurrency());
 
-        notificationClient.sendPaymentEmail(emailRequest);
+        try {
+            notificationClient.sendPaymentEmail(emailRequest);
+        } catch (Exception e) {
+            System.out.println("❌ Failed to send payment email: " + e.getMessage());
+        }
 
-        return "✅ Payment processed successfully. Order status updated and a confirmation email has been sent.";
+        return "✅ Payment processed successfully. Order status updated and confirmation email sent.";
     }
 }

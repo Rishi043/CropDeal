@@ -5,6 +5,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @FeignClient(
         name = "crop-service",
         contextId = "CropClient",
@@ -13,7 +15,8 @@ import org.springframework.web.bind.annotation.*;
 public interface CropClient {
 
     @GetMapping("/by-name/{name}")
-    ResponseEntity<Crop> getCropByName(@PathVariable String name);
+    ResponseEntity<List<Crop>> getCropByName(@PathVariable String name);
+
 
     // Delete crop by ID
     @DeleteMapping("/{id}")

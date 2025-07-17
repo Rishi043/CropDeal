@@ -20,8 +20,7 @@ public interface CropRepository extends JpaRepository<Crop, Long> {
     void reorderCropIds();
 
 
-    @Query("SELECT c FROM Crop c WHERE LOWER(c.name) = LOWER(:name)")
-    List<Crop> findByName(@Param("name") String name);   // Filter by name
+    List<Crop> findByNameContainingIgnoreCase(String name);   // Filter by name
 
 
     List<Crop> findByType(String type);  // Filter by type

@@ -2,6 +2,8 @@ package com.cropdeal.orderservice.feign;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
 @AllArgsConstructor // Lombok: Generates constructor with all fields

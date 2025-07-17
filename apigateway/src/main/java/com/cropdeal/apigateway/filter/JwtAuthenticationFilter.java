@@ -31,7 +31,15 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         String path = exchange.getRequest().getURI().getPath();
         logger.info("Incoming request path: {}", path);
 
-        if (path.contains("/users/auth/login") || path.contains("/users/auth/register")) {
+        if (path.contains("/users/auth/login")
+                || path.contains("/users/auth/register") ||
+                path.equals("/crops/filterPrice") ||
+                path.equals("/crops/allCrops") ||
+                path.equals("/crops/filter") ||
+                path.startsWith("/crops/by-name/")
+        )
+
+        {
             logger.info("Public endpoint accessed: {}", path);
             return chain.filter(exchange);
         }
