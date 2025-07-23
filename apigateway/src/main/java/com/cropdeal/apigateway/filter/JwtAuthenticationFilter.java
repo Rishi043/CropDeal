@@ -32,7 +32,9 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
         logger.info("Incoming request path: {}", path);
 
         if (path.contains("/users/auth/login")
-                || path.contains("/users/auth/register") ||
+                || path.contains("/users/auth/register")
+                || path.contains("/users/auth/forgot-password")
+                || path.contains("/users/auth/reset-password")  ||
                 path.equals("/crops/filterPrice") ||
                 path.equals("/crops/allCrops") ||
                 path.equals("/crops/filter") ||

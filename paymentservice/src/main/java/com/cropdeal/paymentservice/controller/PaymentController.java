@@ -18,11 +18,18 @@ public class PaymentController {
         this.stripeService = stripeService;
     }
 
+//    @PostMapping("/checkout")
+//    public ResponseEntity<StripeResponse> checkoutProduct(@RequestBody PurchaseRequest purchaseRequest) {
+//        StripeResponse stripeResponse = stripeService.checkoutCrops(purchaseRequest);
+//        return ResponseEntity.status(HttpStatus.OK).body(stripeResponse);
+//    }
+
     @PostMapping("/checkout")
-    public ResponseEntity<StripeResponse> checkoutProduct(@RequestBody PurchaseRequest purchaseRequest) {
-        StripeResponse stripeResponse = stripeService.checkoutCrops(purchaseRequest);
-        return ResponseEntity.status(HttpStatus.OK).body(stripeResponse);
+    public ResponseEntity<StripeResponse> checkout(@RequestBody PurchaseRequest request) {
+        StripeResponse response = stripeService.checkoutCrops(request);
+        return ResponseEntity.ok(response);
     }
+
 
     @GetMapping("/success/id/{cropId}/order/{orderId}")
     public ResponseEntity<String> success(@PathVariable Long cropId, @PathVariable Long orderId,@RequestParam  Integer quantity) {
@@ -36,16 +43,16 @@ public class PaymentController {
     }
 
 
-    // ✅ New endpoint to test Circuit Breaker on getCropByName
-    @GetMapping("/crops/by-name/{name}")
-    public ResponseEntity<?> getCropByName(@PathVariable String name) {
-    Crop crop = stripeService.getCropByName(name);
-    if (crop == null) {
-    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-            .body("Crop service unavailable (fallback triggered).");
-    }
-    return ResponseEntity.ok(crop);
-    }
+//    // ✅ New endpoint to test Circuit Breaker on getCropByName
+//    @GetMapping("/crops/by-name/{name}")
+//    public ResponseEntity<?> getCropByName(@PathVariable String name) {
+//    Crop crop = stripeService.getCropByName(name);
+//    if (crop == null) {
+//    return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
+//            .body("Crop service unavailable (fallback triggered).");
+//    }
+//    return ResponseEntity.ok(crop);
+//    }
 }
 
 

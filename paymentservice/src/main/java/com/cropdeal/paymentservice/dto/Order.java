@@ -12,7 +12,9 @@ public class Order {
     private Long orderId;
     private Long cropId;
     private String dealerEmail;
+    private int quantity;
     private LocalDate orderDate;
     private String status;
+    private double amount;     // important for payment
 
 }
