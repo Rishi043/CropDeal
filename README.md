@@ -9,7 +9,7 @@ Crop Deal is an end-to-end agricultural marketplace platform built using **Java 
 - 🔐 JWT-Based Authentication with role management
 - 📦 Microservices architecture with centralized configuration
 - 📬 Email notifications via SMTP integration
-- 💳 Payment confirmation through email (no OTP flow)
+- 💳 Payment confirmation through email 
 - 🛠️ Circuit Breaker pattern for fault tolerance
 
 ---
@@ -20,7 +20,7 @@ Crop Deal is an end-to-end agricultural marketplace platform built using **Java 
 |------------------------|-----------------------------------------------------------------------------|
 | **User Service**        | Manages user registration, login, profile updates, role-based access, and password reset via secure email. |
 | **Crop Service**        | Allows farmers to manage crop listings and dealers to view and subscribe. |
-| **Order Service**       | Handles crop purchase workflow and invoice generation using CQRS.          |
+| **Order Service**       | Handles crop purchase workflow and Real-time order status tracking.          |
 | **Notification Service**| Sends real-time alerts to farmers and dealers via email using SMTP.         |
 | **Payment Service**     | Sends payment success confirmation via email to users.                     |
 | **API Gateway**         | Routes client requests, with integrated circuit breaker mechanism.         |
@@ -43,9 +43,8 @@ Crop Deal is an end-to-end agricultural marketplace platform built using **Java 
 - Dealers can browse crops and receive notifications on new listings
 
 ### 📦 Order Service
-- Dealers can place orders for crops
-- CQRS implementation for efficient querying
-- Invoice generation and record tracking
+- Dealers can place orders for crops with quantity validation
+- Real-time order status tracking (Pending → Success)
 
 ### 📬 Notification Service
 - Sends email notifications using SMTP
@@ -103,7 +102,7 @@ Crop Deal is an end-to-end agricultural marketplace platform built using **Java 
 | `cropservice/`        | Crop-related CRUD operations                 |
 | `eurekaserver/`       | Microservices registration and discovery     |
 | `notificationservice/`| Email notifications and subscription logic   |
-| `orderservice/`       | Order creation and invoice handling          |
+| `orderservice/`       | Order creation and order status tracking     |
 | `paymentservice/`     | Payment confirmation and transaction record  |
 | `userservice/`        | User authentication, profile and reset logic |
 | `README.md`           | Project documentation                        |
